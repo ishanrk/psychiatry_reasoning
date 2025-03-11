@@ -2,19 +2,44 @@ import openai
 import json
 import os
 
+import json
+import pandas as pd
+
 def read_case_history(file_path):
     """
-    Reads and loads the case history from a text file.
+    Reads and loads the case history from a file. Supports TXT, JSON, and CSV formats.
     
     Parameters:
         file_path (str): The path to the file containing the case history.
     
     Returns:
-        str: The contents of the file as a single string.
+        dict or str or DataFrame: Processed case history data. Returns a dictionary for JSON,
+                                  a DataFrame for CSV, and a cleaned string for TXT.
     """
-    with open(file_path, 'r') as f:
-        data = f.read()
-    return data
+    if file_path.endswith(".txt"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = f.read().strip()  # Remove extra whitespace
+        return data
+
+    elif file_path.endswith(".json"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data  # Returns a dictionary
+
+    elif file_path.endswith(".csv"):
+        df = pd.read_csv(file_path)
+        df = df.dropna()  # Remove missing values
+        return df  # Returns a DataFrame
+
+    else:
+        raise ValueError("Unsupported file format. Use TXT, JSON, or CSV.")
+
+# Example Usage:
+# case_data = read_case_history("patient_history.txt")  # Returns a string
+# case_data = read_case_history("patient_data.json")  # Returns a dictionary
+# case_data = read_case_history("patient_records.csv")  # Returns a DataFrame
+
+
 
 def create_patient_profile(case_history):
     """
